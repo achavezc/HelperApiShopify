@@ -37,10 +37,21 @@ function getEvents(lastUpdated) {
 }
 
 function getArticles(lastUpdated) {
-    shopify.article.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
-    .then(function(articles) {
-        console.log(articles);
-        //return articles;
+    var articleList = [];
+    shopify.blog.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    .then(function(blogs) {
+        for(i=0; i<blogs.length;i++){
+         shopify.article.list(blogs[i].id,{ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+              .then(function(articles) {
+                  articleList.push(articles);
+                  //console.log(articles);
+                  return articleList;
+              })
+              .catch(function(err) {
+                  //Call Retry
+                  console.log(err);
+              });
+        }
     })
     .catch(function(err) {
         //Call Retry
@@ -93,10 +104,17 @@ function getCustomers(lastUpdated) {
 }
 
 function getCustomerAddress(lastUpdated) {
-    shopify.customerAddress.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
-    .then(function(customerAddresss) {
-        console.log(customerAddresss);
-        //return customerAddresss;
+  var addresList = [];
+  shopify.customer.list( '5161635337',{created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    .then(function(customers) {
+          for(i=0; i<customers.length;i++){
+           shopify.customerAddress.list( customers[i].id,{created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+            .then(function(customerAddresss) {
+                addresList.push(customerAddresss);
+                //console.log(customerAddresss);
+                return addresList;
+            })
+          }
     })
     .catch(function(err) {
         //Call Retry
@@ -115,5 +133,5 @@ function getTransactions(lastUpdated) {
     });
 }
 
-getArticles(lastUpdated);
+///getCustomerAddress(lastUpdated);
 ///getCustomerAddress(lastUpdated)
