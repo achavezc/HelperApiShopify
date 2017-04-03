@@ -116,4 +116,4 @@ function getTransactions(lastUpdated) {
 }
 
 getArticles(lastUpdated);
-//getCustomerAddress(lastUpdated)
+///getCustomerAddress(lastUpdated)
