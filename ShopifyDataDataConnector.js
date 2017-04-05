@@ -1,5 +1,6 @@
 
 const Shopify = require('./shopify-api-node');
+const moment = require('moment');
 
 const shopify = new Shopify({
   shopName: 'alshopping',
@@ -9,24 +10,53 @@ const shopify = new Shopify({
 
 
 lastUpdated = {
-  created_at_min : '2017-01-30',
-  created_at_max : '2017-04-01'
+  created_at_min : '01/01/2017 4:52:48 PM',
+  timezone : 'GMT-11:00'
+}
+
+function toTimeZone(time, zone) {
+    return  new Date(time + ' ' +  zone);
+}
+
+function getTimeZone() {
+    var resultEvent = {};
+    resultEvent.Result = {}
+    resultEvent.Result.Success = false;
+    shopify.shop.get({ })
+    .then(function(shop) {
+        resultEvent.TimeZone  = shop.timezone;
+        resultEvent.Result.Success = true;
+        return resultEvent;
+    })
+    .catch(function(err) {
+        resultEvent.Result.Success = false;
+        resultEvent.Result.Error = err;
+        return resultEvent;
+    });
 }
 
 function getOrders(lastUpdated) {
-    shopify.order.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    var resultEvent = {};
+    resultEvent.Result = {}
+    resultEvent.Result.Success = false;
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.order.list({ created_at_min: date})
     .then(function(orders) {
-        //console.log(orders);
-        return orders;
+        resultEvent.Orders  = orders;
+        resultEvent.Result.Success = true;
+        console.log(resultEvent);
+        return resultEvent;
     })
     .catch(function(err) {
-        //Call Retry
-        console.log(err);
+        resultEvent.Result.Success = false;
+        resultEvent.Result.Error = err;
+        return resultEvent;
     });
 }
 
 function getEvents(lastUpdated) {
-    shopify.event.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+     var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.event.list({ created_at_min: date})
     .then(function(events) {
         return events;
     })
@@ -37,11 +67,12 @@ function getEvents(lastUpdated) {
 }
 
 function getArticles(lastUpdated) {
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
     var articleList = [];
-    shopify.blog.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    shopify.blog.list({ created_at_min: date})
     .then(function(blogs) {
         for(i=0; i<blogs.length;i++){
-         shopify.article.list(blogs[i].id,{ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+         shopify.article.list(blogs[i].id,{ created_at_min: date})
               .then(function(articles) {
                   articleList.push(articles);
                   //console.log(articles);
@@ -60,7 +91,8 @@ function getArticles(lastUpdated) {
 }
 
 function getCustomCollections(lastUpdated) {
-    shopify.customCollection.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+     var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.customCollection.list({ created_at_min: date})
     .then(function(customCollections) {
         return customCollections;
     })
@@ -71,7 +103,8 @@ function getCustomCollections(lastUpdated) {
 }
 
 function getComments(lastUpdated) {
-    shopify.comment.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.comment.list({ created_at_min: date})
     .then(function(comments) {
         return comments;
     })
@@ -82,7 +115,8 @@ function getComments(lastUpdated) {
 }
 
 function getProducts(lastUpdated) {
-    shopify.product.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.product.list({ created_at_min: date})
     .then(function(products) {
         return products;
     })
@@ -93,7 +127,8 @@ function getProducts(lastUpdated) {
 }
 
 function getCustomers(lastUpdated) {
-    shopify.customer.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.customer.list({ created_at_min: date})
     .then(function(customers) {
         return customers;
     })
@@ -104,11 +139,12 @@ function getCustomers(lastUpdated) {
 }
 
 function getCustomerAddress(lastUpdated) {
+  var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
   var addresList = [];
-  shopify.customer.list( '5161635337',{created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+  shopify.customer.list( '5161635337',{created_at_min: date})
     .then(function(customers) {
           for(i=0; i<customers.length;i++){
-           shopify.customerAddress.list( customers[i].id,{created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+           shopify.customerAddress.list( customers[i].id,{created_at_min: date})
             .then(function(customerAddresss) {
                 addresList.push(customerAddresss);
                 //console.log(customerAddresss);
@@ -123,7 +159,8 @@ function getCustomerAddress(lastUpdated) {
 }
 
 function getTransactions(lastUpdated) {
-    shopify.transaction.list({ created_at_min: lastUpdated.created_at_min, created_at_max: lastUpdated.created_at_max})
+    var date = toTimeZone(lastUpdated.created_at_min,lastUpdated.timezone);
+    shopify.transaction.list({ created_at_min: date})
     .then(function(transactions) {
         return transactions;
     })
@@ -133,5 +170,7 @@ function getTransactions(lastUpdated) {
     });
 }
 
+
+getOrders();
 ///getCustomerAddress(lastUpdated);
 ///getCustomerAddress(lastUpdated)
