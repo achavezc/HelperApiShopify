@@ -1,6 +1,5 @@
 
 const Shopify = require('./shopify-api-node');
-const moment = require('moment');
 
 const shopify = new Shopify({
   shopName: 'alshopping',
@@ -15,7 +14,7 @@ lastUpdated = {
 }
 
 function toTimeZone(time, zone) {
-    return  new Date(time + ' ' +  zone);
+    return  new Date(time + ' ' +  zone).toISOString();
 }
 
 function getTimeZone() {
@@ -171,6 +170,4 @@ function getTransactions(lastUpdated) {
 }
 
 
-getOrders();
-///getCustomerAddress(lastUpdated);
-///getCustomerAddress(lastUpdated)
+getOrders(lastUpdated);
